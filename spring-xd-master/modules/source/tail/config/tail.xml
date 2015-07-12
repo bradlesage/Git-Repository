@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/integration"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:event="http://www.springframework.org/schema/integration/event"
+	xmlns:file="http://www.springframework.org/schema/integration/file"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration
+		http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/integration/event
+		http://www.springframework.org/schema/integration/event/spring-integration-event.xsd
+		http://www.springframework.org/schema/integration/file
+		http://www.springframework.org/schema/integration/file/spring-integration-file.xsd">
+
+	<!-- Using default null values here on purpose. Could also explicitly declare a PPC that allows nulls -->
+	<file:tail-inbound-channel-adapter channel="output"
+		auto-startup="false"
+		file="${name}"
+		delay="${delay:}"
+		end="${fromEnd:}"
+		reopen="${reOpen:}"
+		native-options="${computedNativeOptions:}" file-delay="${fileDelay}" />
+
+	<channel id="output"/>
+
+	<event:inbound-channel-adapter id="events"
+		event-types="org.springframework.integration.file.tail.FileTailingMessageProducerSupport$FileTailingEvent" />
+
+	<logging-channel-adapter channel="events" level="WARN" />
+
+</beans:beans>

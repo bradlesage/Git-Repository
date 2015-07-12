@@ -1,0 +1,26 @@
+---
+spring:
+  profiles: admin
+
+management:
+  security:
+    enabled: true
+
+security:
+  basic:
+    enabled: true
+  user:
+    name: admin
+    password: whosThere
+
+xd:
+ security:
+   authentication:
+     ldap:
+       enabled: true
+       url: ldap://localhost:${ldap.port}
+       userDnPattern: uid={0},ou=otherpeople,dc=springframework,dc=org
+       groupSearchFilter: member={0}
+       groupRoleAttribute: cn
+       groupSearchBase: ou=groups,dc=springframework,dc=org
+---

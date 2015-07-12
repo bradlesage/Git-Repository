@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:hadoop="http://www.springframework.org/schema/hadoop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<context:property-placeholder properties-ref="myProperties" />
+
+	<util:properties id="myProperties" >
+		<prop key="wordcount.input.path">/xd/count/in/</prop>
+		<prop key="wordcount.lib.path">/xd/count/lib/</prop>
+		<prop key="wordcount.output.path">/xd/count/out/</prop>
+	</util:properties>
+
+	<hadoop:configuration>
+		fs.defaultFS=${spring.hadoop.fsUri}
+		yarn.resourcemanager.address=${spring.hadoop.resourceManagerHost}:${spring.hadoop.resourceManagerPort}
+		mapreduce.framework.name=yarn
+		mapreduce.jobhistory.address=${spring.hadoop.resourceManagerHost}:10020
+	</hadoop:configuration>
+
+	<!-- required since Hadoop Job is a class not an interface and we need to use a Job with step scope to access #{jobParameters['...']} -->
+	<bean class="org.springframework.batch.core.scope.StepScope">
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
+
+	<batch:job id="job">
+		<batch:step id="import" next="wordcount">
+			<batch:tasklet ref="scriptTasklet"/>
+		</batch:step>
+		<batch:step id="wordcount">
+			<batch:tasklet ref="wordcount-tasklet" />
+		</batch:step>
+	</batch:job>
+
+	<hadoop:job-tasklet id="wordcount-tasklet" job-ref="wordcountJob"/>
+
+	<hadoop:job id="wordcountJob"
+		input-path="${wordcount.input.path}"
+		output-path="${wordcount.output.path}"
+		mapper="org.apache.hadoop.examples.WordCount$TokenizerMapper"
+		reducer="org.apache.hadoop.examples.WordCount$IntSumReducer"
+		scope="step" />
+	<hadoop:cache create-symlink="true">
+		<hadoop:cache value="${wordcount.lib.path}${xd.module.name}.zip#module-lib" />
+		<hadoop:classpath value="module-lib/lib/*.jar" />
+	</hadoop:cache>
+
+	<hadoop:script-tasklet id="scriptTasklet" script-ref="hdfsScript" scope="step"/>
+	<hadoop:script id="hdfsScript" language="groovy" scope="step"><!-- file:///#{jobParameters['input.file.name']} -->
+		<hadoop:property name="localSourceFile" value="${resources:file:///#{jobParameters['absoluteFilePath']}}"/>
+		<hadoop:property name="hdfsInputDir" value="${wordcount.input.path}"/>
+		<hadoop:property name="hdfsOutputDir" value="${wordcount.output.path}"/>
+		<hadoop:property name="moduleArchivePath" value="${xd.customModule.home}/job/"/>
+		<hadoop:property name="moduleArchiveName" value="${xd.module.name}"/>
+		<hadoop:property name="hdfsLibDir" value="${wordcount.lib.path}"/>
+		// use the shell (made available under variable fsh)
+		if (fsh.test(hdfsInputDir)) {
+			fsh.rmr(hdfsInputDir)
+		}
+		fsh.mkdir(hdfsInputDir);
+		fsh.copyFromLocal(localSourceFile, hdfsInputDir);
+
+		if (fsh.test(hdfsOutputDir)) {
+			fsh.rmr(hdfsOutputDir)
+		}
+
+		// copy the module jar that contains the hadoop-example jar where the mapper and reducer classes are
+		// make it a zip archive by changing the file extension so it can be extracted in the distributed cache
+		if (fsh.test(hdfsLibDir)) {
+			fsh.rmr(hdfsLibDir)
+		}
+		fsh.mkdir(hdfsLibDir);
+		if (moduleArchivePath.startsWith("hdfs:")) {
+			fsh.cp(moduleArchivePath + moduleArchiveName + ".jar", hdfsLibDir + moduleArchiveName + ".zip");
+		}
+		else {
+			fsh.put(moduleArchivePath + moduleArchiveName + ".jar", hdfsLibDir + moduleArchiveName + ".zip");
+		}
+	</hadoop:script>
+
+</beans>
+

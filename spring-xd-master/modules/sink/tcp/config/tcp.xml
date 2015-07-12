@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<import resource="../../../common/tcp-encdec.xml"/>
+	
+	<int:channel id="input"/>
+
+	<int-ip:tcp-connection-factory id="connectionFactory"
+		type="client"
+		host="${host}"
+		port="${port}"
+		lookup-host="${reverseLookup}"
+		using-nio="${nio}"
+		using-direct-buffers="${useDirectBuffers}"
+		single-use="${close}"
+		mapper="mapper"
+		so-timeout="${socketTimeout}"
+		serializer="${encoder}"/>
+
+	<int-ip:tcp-outbound-channel-adapter id="adapter" channel="input"
+			connection-factory="connectionFactory" />
+
+	<bean id="mapper" class="org.springframework.integration.ip.tcp.connection.TcpMessageMapper">
+		<property name="charset" value="${charset}"/>
+	</bean>
+
+
+</beans>

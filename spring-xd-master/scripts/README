@@ -1,0 +1,56 @@
+Spring XD 1.2.0.RELEASE
+=======================
+
+Please refer to the Reference Guide for more information on Getting Started with Spring XD.
+
+The Spring XD distribution has the following directory structure:
+
+├── spring-xd-<version>
+|   ├── docs
+│   ├── gemfire
+│   │   ├── bin
+│   │   ├── config
+│   │   └── lib
+|   ├── hsqldb
+|   │   ├── bin
+|   │   └── lib
+│   ├── python
+│   ├── redis
+│   │   ├── bin
+│   │   └── dist
+│   ├── shell
+│   │   ├── bin
+│   │   ├── config
+│   │   └── lib
+│   └── xd
+│       ├── bin
+│       ├── config
+│       ├── lib
+│       └── modules
+│       |   ├── common
+│       |   ├── job
+│       |   ├── processor
+│       |   ├── sink
+│       |   ├── source
+|       └── spring-xd-ui
+│   └── zookeeper
+
+
+To install Redis:
+
+cd spring-xd/redis/bin
+./install-redis
+  - This will compile the redis source tar and make the executables available under redis/bin
+
+To run Spring-XD container:
+./spring-xd/xd/bin/xd-container[*.bat] [options] 
+
+To run Spring-XD admin server:
+./spring-xd/xd/bin/xd-admin[*.bat] [options] 
+
+To run Spring-XD singlenode server:
+./spring-xd/xd/bin/xd-singlenode[*.bat] [options]
+
+To run Spring-XD shell:
+./spring-xd/shell/bin/xd-shell[*.bat] [options] 
+

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-syslog="http://www.springframework.org/schema/integration/syslog"
+	xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration/syslog http://www.springframework.org/schema/integration/syslog/spring-integration-syslog.xsd
+		http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<int-syslog:inbound-channel-adapter id="adapter" channel="output"
+			protocol="tcp"
+			connection-factory="syslogIn"
+			auto-startup="false"
+			converter="syslogConverter" />
+
+	<int-ip:tcp-connection-factory id="syslogIn"
+			type="server"
+			using-nio="${nio}"
+			port="${port}"
+			deserializer="syslogDeserializer" />
+
+	<int:channel id="output"/>
+
+	<beans profile="rfc3164"> <!-- aka BSD -->
+
+		<bean id="syslogDeserializer" class="org.springframework.integration.ip.tcp.serializer.ByteArrayLfSerializer" />
+
+		<bean id="syslogConverter" class="org.springframework.integration.syslog.DefaultMessageConverter" />
+
+	</beans>
+
+	<beans profile="rfc5424">
+
+		<bean id="syslogDeserializer" class="org.springframework.integration.syslog.inbound.RFC6587SyslogDeserializer" />
+
+		<bean id="syslogConverter" class="org.springframework.integration.syslog.RFC5424MessageConverter" />
+
+	</beans>
+
+</beans>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-mqtt="http://www.springframework.org/schema/integration/mqtt"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/integration/mqtt http://www.springframework.org/schema/integration/mqtt/spring-integration-mqtt.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<import resource="../../../common/mqtt-infrastructure-context.xml" />
+
+	<int:channel id="input" />
+
+	<int-mqtt:outbound-channel-adapter id="mqttOutbound"
+		client-id="${clientId}"
+		default-topic="${topic}"
+		client-factory="clientFactory"
+		async="${async}"
+		converter="converter"
+		channel="input" />
+
+	<bean id="converter" class="org.springframework.integration.mqtt.support.DefaultPahoMessageConverter">
+		<constructor-arg value="${qos}" />
+		<constructor-arg value="${retained}" />
+		<constructor-arg value="${charset}" />
+	</bean>
+
+</beans>

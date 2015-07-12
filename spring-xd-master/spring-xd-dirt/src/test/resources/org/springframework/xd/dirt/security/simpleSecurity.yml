@@ -1,0 +1,16 @@
+---
+spring:
+  profiles: admin
+
+management:
+  security:
+    enabled: true
+
+security:
+  basic:
+    enabled: true
+  user:
+    name: admin
+    password: whosThere
+    role: VIEW, CREATE, ADMIN
+---

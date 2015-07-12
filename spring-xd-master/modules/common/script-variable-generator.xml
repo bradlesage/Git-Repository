@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+		<bean class="org.springframework.integration.scripting.DefaultScriptVariableGenerator" id="variableGenerator">
+			<constructor-arg>
+				<bean id="props" class="org.springframework.xd.extension.script.ScriptModulePropertiesFactoryBean">
+					<property name="locations" value="${propertiesLocation:#{null}}" />
+					<property name="ignoreResourceNotFound" value="true" />
+					<property name="variables" value="${variables:#{null}}"/>
+				</bean>
+			</constructor-arg>
+		</bean>
+</beans>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<import resource="../../../common/tcp-encdec.xml"/>
+	
+	<int-ip:tcp-connection-factory id="connectionFactory"
+		type="server"
+		port="${port}"
+		lookup-host="${reverseLookup}"
+		so-timeout="${socketTimeout}"
+		using-nio="${nio}"
+		using-direct-buffers="${useDirectBuffers}"
+		deserializer="${decoder}"/>
+
+	<int-ip:tcp-inbound-channel-adapter id="adapter" channel="output"
+			auto-startup="false"
+			connection-factory="connectionFactory"/>
+
+	<int:channel id="output"/>
+
+
+</beans>
